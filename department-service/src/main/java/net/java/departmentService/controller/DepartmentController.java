@@ -32,4 +32,5 @@ public class DepartmentController {
         DepartmentDto departmentDto = departmentService.getDepartmentByCode(departmentCode);
         return new ResponseEntity<>(departmentDto, HttpStatus.OK); 
     }
+
 }
