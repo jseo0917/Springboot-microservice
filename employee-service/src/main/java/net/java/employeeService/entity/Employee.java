@@ -22,11 +22,9 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    
     String firstName;
-    
     String lastName;
-    
     @Column(nullable = false, unique= true)
     String email;
+    private String departmentCode;
 }

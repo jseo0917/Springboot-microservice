@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
 import lombok.AllArgsConstructor;
+import net.java.employeeService.dto.APIResponseDto;
+import net.java.employeeService.dto.DepartmentDto;
 import net.java.employeeService.dto.EmployeeDto;
 import net.java.employeeService.entity.Employee;
 import net.java.employeeService.exception.EmailAlreadyExistsException;
@@ -25,13 +27,22 @@ public class EmployeeServiceImpl implements EmployeeService {
     
     private EmployeeRepository employeeRepository;
     private ModelMapper modelMapper;
-    
+    // private RestTemplate restTemplate;
+    // private WebClient webClient;
+    private APIClient apiClient;
+
     @Override
     public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
         // Employee employee =  EmployeeMapper.mapToEmployee(employeeDto);
         
         Employee employee = modelMapper.map(employeeDto, Employee.class);
         
+        Optional<Employee> optionalEmployee = employeeRepository.findByEmail(employee.getEmail());
+
+        if(optionalEmployee.isPresent()){
+            throw new EmailAlreadyExistsException("Email Already Exists for the user");
+        }
+
         Employee savedEmployee = employeeRepository.save(employee);
 
         EmployeeDto savedEmployeeDto = modelMapper.map(savedEmployee, EmployeeDto.class);
@@ -40,22 +51,33 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeDto getEmployeeById(Long id) {
+    public APIResponseDto getEmployeeById(Long id) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(
                 () -> new ResourceNotFoundException("Employee", "id", id)
             );
 
-        Optional<Employee> optionalEmployee = employeeRepository.findByEmail(employee.getEmail());
+        // ResponseEntity<DepartmentDto> responseEntity = restTemplate.getForEntity("http://localhost:8080/api/departments/" + employee.getDepartmentCode()
+        // , DepartmentDto.class);
 
-        if(optionalEmployee.isPresent()){
-            throw new EmailAlreadyExistsException("Email Already Exists for the user");
-        }
+        // DepartmentDto departmentDto = webClient.get()
+        //     .uri("http://localhost:8080/api/departments/" + employee.getDepartmentCode())
+        //     .retrieve()
+        //     .bodyToMono(DepartmentDto.class)
+        //     .block();
+
+        // DepartmentDto departmentDto = responseEntity.getBody();
+
+        DepartmentDto departmentDto = apiClient.getDepartment(employee.getDepartmentCode());
 
         EmployeeDto employeeDto = modelMapper.map(employee, EmployeeDto.class);
 
-        return employeeDto;
-    }
+        APIResponseDto apiResponseDto = new APIResponseDto();
+    
+        apiResponseDto.setEmployeeDto(employeeDto);
+        apiResponseDto.setDepartmentDto(departmentDto);
+        return apiResponseDto;
+    }    
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     ResponseEntity<ErrorDetails> handleEmailAlreadyExistsException(EmailAlreadyExistsException exception, WebRequest webRequest){
