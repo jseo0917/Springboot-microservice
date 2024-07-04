@@ -1,5 +1,5 @@
 ### Project Description
-Microservices with Spring Boot and Spring Cloud to manage hierarchical organizational structures, including branching across multiple organizations, departments, and employees, all integrate with an API Gateway for efficient request handling.
+Built microservices with Spring Boot and Spring Cloud to manage hierarchical organizational structures, including branching across multiple organizations, departments, and employees, all integrate with an API Gateway for efficient request handling.
 
 ### Technologies used
 #### Front-end 
